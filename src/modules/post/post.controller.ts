@@ -1,8 +1,12 @@
 import { Request, Response } from "express";
+import { postService } from "./post.service";
 
 
 const createPost=async(req:Request,res:Response)=>{
     try{
+        // console.log(req.body)
+        const result=await postService.createPost(req.body)
+        console.log("result from the controller",result)
         return res.status(200).json({message:"post create successfuly"})
     }
     catch(error:any){

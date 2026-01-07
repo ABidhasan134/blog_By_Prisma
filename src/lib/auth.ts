@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: "abeydhasan134@gmail.com",
-    pass: "ldnuivkanyizrtag", // The 16-character App Password
+    pass: "ldnuivkanyizrtag", 
   },
 });
 
@@ -142,4 +142,12 @@ export const auth = betterAuth({
       }
     },
   },
+   socialProviders: {
+        google: { 
+            clientId: process.env.GOOGLE_CLIENT_ID as string, 
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
+            accessType: "offline", 
+            prompt: "select_account consent",
+        }, 
+    }
 });

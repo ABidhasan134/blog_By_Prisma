@@ -1,4 +1,4 @@
-import { Post } from "../../../generated/prisma/client";
+import { Post, PostStatus } from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 
@@ -19,6 +19,9 @@ const createPost = async (
 const allPostGet = async (payload: {
   searchValue: string | undefined;
   tags: string[] | [];
+  isFeatured:boolean | undefined,
+  status:PostStatus|undefined,
+  authorId:string | undefined
 }) => {
   // console.log("get all the post from service",);
   const conditionArray:PostWhereInput[] = [];
@@ -51,6 +54,15 @@ const allPostGet = async (payload: {
         hasEvery: payload.tags
       }
     })
+  }
+  if(typeof payload.isFeatured==='boolean'){
+    conditionArray.push({isFeatured:payload.isFeatured})
+  }
+  if(payload.status){
+    conditionArray.push({status:payload.status})
+  }
+  if(payload.authorId){
+    conditionArray.push({authorId:payload.authorId})
   }
   const allpost = await prisma.post.findMany({
     where: {

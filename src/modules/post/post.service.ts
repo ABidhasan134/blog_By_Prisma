@@ -1,4 +1,5 @@
 import { Post } from "../../../generated/prisma/client";
+import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 
 const createPost = async (
@@ -15,13 +16,16 @@ const createPost = async (
 
   return result;
 };
-const allPostGet = async (payload: { searchValue: string | undefined ,tags:string[]|[]}) => {
+const allPostGet = async (payload: {
+  searchValue: string | undefined;
+  tags: string[] | [];
+}) => {
   // console.log("get all the post from service",);
-   const allpost = await prisma.post.findMany({
-    where: {
-      AND:[
-       { OR: [
-        payload.searchValue&&{
+  const conditionArray:PostWhereInput[] = [];
+  if (payload.searchValue) {
+    conditionArray.push({
+      OR: [
+        {
           title: {
             contains: payload.searchValue as string,
             mode: "insensitive",
@@ -38,11 +42,19 @@ const allPostGet = async (payload: { searchValue: string | undefined ,tags:strin
             has: payload.searchValue as string,
           },
         },
-      ]},
-      {tags:{
-        hasEvery:payload.tags
-      }}
-      ]
+      ],
+    });
+  }
+  if (payload.tags.length > 0) {
+    conditionArray.push({
+      tags: {
+        hasEvery: payload.tags
+      }
+    })
+  }
+  const allpost = await prisma.post.findMany({
+    where: {
+      AND: conditionArray,
     },
   });
   console.log("search result from the service", allpost);

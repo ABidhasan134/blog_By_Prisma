@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { postService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/enums";
+import sortingAndPagination from "../../helpers/sortingHelper";
 
 const createPost = async (req: Request, res: Response) => {
   try {
@@ -22,11 +23,14 @@ const getallPost = async (req: Request, res: Response) => {
   try {
     const searchValue = req.query.search;
     const paginationpage=req.query.page
-    const paginationlimit=req.query.limit
-    const page = Number(paginationpage||1);
-    const limit= Number(paginationlimit||0)
-    const skip=(page-1)*limit;
-    console.log("pagination info from the getallpost controller",)
+    // const paginationlimit=req.query.limit
+    // const page = Number(paginationpage||1);
+    // const limit= Number(paginationlimit||0)
+    // const skip=(page-1)*limit;
+    // const sortBy=req.query.sortBy as string | undefined;
+    // const sortOrder=req.query.sortOrder as string | undefined;
+    const {page,limit,skip,sortBy,sortOrder}=sortingAndPagination(req.query)
+    // console.log("pagination info from the getallpost controller",options)
     const searchString =
       typeof searchValue === "string" ? searchValue : undefined;
     const tags = req.query.tags ? (req.query.tags as string).split(",") : [];
@@ -40,7 +44,8 @@ const getallPost = async (req: Request, res: Response) => {
 
     const status=req.query.status as PostStatus|undefined
     const authorId=req.query.authorId as string | undefined
-    console.log(authorId)
+    // console.log(authorId)
+
     const result = await postService.allPostGet({
       searchValue: searchString,
       tags,
@@ -49,7 +54,9 @@ const getallPost = async (req: Request, res: Response) => {
       authorId,
       page,
       limit,
-      skip
+      skip,
+      sortBy,
+      sortOrder
     });
 
     console.log("searchvalue from the controller", searchValue);

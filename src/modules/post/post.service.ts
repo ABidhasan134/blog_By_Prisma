@@ -1,5 +1,6 @@
 
 import { Post, PostStatus } from "../../../generated/prisma/client";
+import { SortOrder } from "../../../generated/prisma/internal/prismaNamespace";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 
@@ -25,7 +26,9 @@ const allPostGet = async (payload: {
   authorId:string | undefined,
    page:number,
    limit:number,
-   skip:number
+   skip:number,
+   sortBy: string | undefined,
+   sortOrder:string | undefined
 }) => {
   // console.log("get all the post from service",);
   const conditionArray:PostWhereInput[] = [];
@@ -74,7 +77,11 @@ const allPostGet = async (payload: {
     where: {
       AND: conditionArray,
     },
-  });
+    orderBy: payload.sortBy && payload.sortOrder
+    ? { [payload.sortBy]: payload.sortOrder }
+    : { createdAt: "desc" }
+  }
+  );
   console.log("search result from the service", allpost);
   return allpost;
 };

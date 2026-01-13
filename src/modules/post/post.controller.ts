@@ -21,6 +21,12 @@ const createPost = async (req: Request, res: Response) => {
 const getallPost = async (req: Request, res: Response) => {
   try {
     const searchValue = req.query.search;
+    const paginationpage=req.query.page
+    const paginationlimit=req.query.limit
+    const page = Number(paginationpage||1);
+    const limit= Number(paginationlimit||0)
+    const skip=(page-1)*limit;
+    console.log("pagination info from the getallpost controller",)
     const searchString =
       typeof searchValue === "string" ? searchValue : undefined;
     const tags = req.query.tags ? (req.query.tags as string).split(",") : [];
@@ -40,7 +46,10 @@ const getallPost = async (req: Request, res: Response) => {
       tags,
       isFeatured,
       status,
-      authorId
+      authorId,
+      page,
+      limit,
+      skip
     });
 
     console.log("searchvalue from the controller", searchValue);

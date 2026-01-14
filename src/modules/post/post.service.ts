@@ -1,6 +1,5 @@
 
 import { Post, PostStatus } from "../../../generated/prisma/client";
-import { SortOrder } from "../../../generated/prisma/internal/prismaNamespace";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 
@@ -82,8 +81,37 @@ const allPostGet = async (payload: {
     : { createdAt: "desc" }
   }
   );
+  const total= await prisma.post.count({
+     where: {
+      AND: conditionArray,
+    },
+  })
   console.log("search result from the service", allpost);
-  return allpost;
+  return {
+    date:allpost,
+    pagination:{
+      total,
+      page:payload.page,
+      limit:payload.limit,
+      totalPage: Math.ceil(total/payload.limit)
+    }
+  };
 };
+const getSingelPostService=async(postId:string)=>{
+  console.log("get single service ",postId)
+  const result =await prisma.$transaction(async (tx) => {
+    await tx.post.update({
+      where: { id: postId },
+      data: {
+        viewCount: { increment: 1 },
+      },
+    });
 
-export const postService = { createPost, allPostGet };
+    return tx.post.findUnique({
+      where: { id: postId },
+    });
+  });
+  console.log("get single service ",result)
+  return result
+}
+export const postService = { createPost, allPostGet,getSingelPostService };

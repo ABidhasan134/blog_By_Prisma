@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { postService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/enums";
 import sortingAndPagination from "../../helpers/sortingHelper";
+import { success } from "better-auth/*";
 
 const createPost = async (req: Request, res: Response) => {
   try {
@@ -73,4 +74,27 @@ const getallPost = async (req: Request, res: Response) => {
     });
   }
 };
-export const postsController = { createPost, getallPost };
+
+const getSinglePost=async(req:Request,res:Response)=>{
+  try{
+    const {postId}=req.params;
+    console.log("post id from the controller", postId)
+    if(!postId){
+      throw new Error("post id is requird");
+    }
+    const result= await postService.getSingelPostService(postId as string)
+    return res.status(200).json({
+      success:true,
+      message: "single post get successfuly get",
+      result
+    })
+  }
+  catch(error){
+    console.log("error from the singel post controller",error);
+    return res.status(500).json({
+      success:false,
+      message: 'singel internal post'
+    })
+  }
+}
+export const postsController = { createPost, getallPost,getSinglePost };

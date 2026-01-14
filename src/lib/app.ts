@@ -1,5 +1,6 @@
 import express from 'express'
 import { postrouter } from '../modules/post/post.route';
+import { commentRouter } from '../modules/comment/comment.route';
 import { toNodeHandler } from "better-auth/node";
 import { auth } from './auth';
 import cors from 'cors'
@@ -16,6 +17,7 @@ import cors from 'cors'
 // app.all("/api/auth/:path(*)", toNodeHandler(auth));
 
  app.use('/post',postrouter)
+ app.use('/comment',commentRouter)
  app.get('/',(req,res)=>{
     console.log("Hello world")
     res.send("hello world")

@@ -8,7 +8,7 @@ const createCommentService=async(payload:{
     parentId?:string
 })=>{
     console.log("comment service",payload);
-    const postInfo= await prisma.post.findUniqueOrThrow({
+   await prisma.post.findUniqueOrThrow({
         where:{
             id:payload.postId
         }
@@ -16,7 +16,7 @@ const createCommentService=async(payload:{
     if(payload.parentId){
        await prisma.comment.findFirstOrThrow({
             where:{
-                parentId:payload.parentId
+                id:payload.parentId
             }
         })
     }

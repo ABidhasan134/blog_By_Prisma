@@ -1,5 +1,5 @@
 
-import { Post, PostStatus } from "../../../generated/prisma/client";
+import { commentStatus, Post, PostStatus } from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 
@@ -78,7 +78,11 @@ const allPostGet = async (payload: {
     },
     orderBy: payload.sortBy && payload.sortOrder
     ? { [payload.sortBy]: payload.sortOrder }
-    : { createdAt: "desc" }
+    : { createdAt: "desc" },
+      include:{
+        _count:{select:{comments:true}}
+      }
+
   }
   );
   const total= await prisma.post.count({
@@ -107,9 +111,38 @@ const getSingelPostService=async(postId:string)=>{
       },
     });
 
-    return tx.post.findUnique({
-      where: { id: postId },
-    });
+  return tx.post.findUnique({
+  where: { id: postId },
+  include: {
+    comments: {
+      where: {
+        parentId: null, // top-level comments
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        replies: {
+          orderBy: {
+            createdAt: "asc",
+          },
+          include: {
+            replies: {
+              orderBy: {
+                createdAt: "asc",
+              },
+            },
+          },
+        },
+      },
+    },
+    _count:{
+      select:{comments:true}
+    }
+  },
+});
+
+
   });
   console.log("get single service ",result)
   return result

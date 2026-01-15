@@ -43,9 +43,9 @@ model Comment {
   content   String        @db.Text
   postId    String
   parentId  String? //below two filed have self relation 
-  parent    Comment?      @relation("CommentReplies", fields: [parentId], references: [id])
+  parent    Comment?      @relation("CommentReplies", fields: [parentId], references: [id],onDelete: Cascade)
   replies   Comment[]     @relation("CommentReplies")
-  post      Post          @relation(fields: [postId], references: [id])
+  post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
   status    commentStatus @default(APPROVED)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt

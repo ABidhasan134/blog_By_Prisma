@@ -1,4 +1,36 @@
+import { commentStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
+
+
+const getCommeteByAuthourID=async(authorId:string)=>{
+    const result= await prisma.comment.findMany({
+        where:{
+            authorId:authorId
+        },
+        orderBy:{createdAt:'desc'},
+        include:{
+            post:{
+                select:{id:true,title:true}
+            }
+        }
+    })
+    console.log("this is form the author Id getting", result)
+    return result;
+}
+
+const getCommentByID = async (id: string) => {
+  const result = await prisma.comment.findUnique({
+    where: { id: id.trim() // remove whitespace
+     },
+       include:{
+        post:{
+            select:{id:true,title:true}
+        }
+       }
+  });
+  console.log("Comment from service:", result);
+  return result;
+};
 
 
 const createCommentService=async(payload:{
@@ -25,4 +57,51 @@ const createCommentService=async(payload:{
     })
     return result
 }
-export const commentService={createCommentService}
+
+const deleteCommentService=async(commentId:string,id:string)=>{
+    const commentInfo= await prisma.comment.findUnique({
+        where:{
+            id : commentId
+        }
+    })
+    if(id!==commentInfo?.authorId){
+        console.log("author match info from the srvice", commentInfo);
+        return null
+    }
+    console.log("No author info from the srvice", commentInfo);
+
+    const result= await prisma.comment.delete({
+        where:{
+            id:commentId
+        }
+    })
+    return result;
+}
+
+const updatedCommentService = async (
+  commentId: string,
+  data: { content?: string; status?: commentStatus },
+  id: string
+) => {
+  const commentInfo = await prisma.comment.findFirst({
+    where: {
+      id: commentId,
+      authorId: id
+    }
+  });
+
+  if (!commentInfo) {
+    return null;
+  }
+
+  const result = await prisma.comment.update({
+    where: {
+      id: commentId
+    },
+    data
+  });
+
+  return result;
+};
+
+export const commentService={createCommentService,getCommentByID,getCommeteByAuthourID,deleteCommentService,updatedCommentService}

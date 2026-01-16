@@ -53,6 +53,7 @@ const createComment=async(req:Request,res:Response)=>{
         // console.log("post info from the controller",postInfo);
         const user= req.user
         req.body.authorId=user?.id
+        console.log("user id", req.user)
         const result= await commentService.createCommentService(req.body)
         return res.status(200).json({
             success:true,
@@ -131,6 +132,27 @@ const updatedComment = async (req: Request, res: Response) => {
   }
 };
 
+const updateComentStatus=async(req:Request,res:Response)=>{
+  try{
+    const {commentId}=req.params;
+    const {status}=req.body;
+    console.log(req.user)
+    // console.log(status)
+    const result=await commentService.commentStatusOnlyAdmain(commentId as string,status)
+    return res.status(200).json({
+      success: true,
+      message: "Comment status updated successfully",
+      result
+    });
+  }
+  catch(error){
+    console.log("error from the comment update controller", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error
+    });
+  }
+}
 
-
-export const commentController={createComment,getCommentById,getcommentByAuthorId,deleteCommentByID,updatedComment}
+export const commentController={createComment,getCommentById,getcommentByAuthorId,deleteCommentByID,updatedComment,updateComentStatus}

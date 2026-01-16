@@ -12,8 +12,10 @@ import cors from 'cors'
    origin: process.env.FRONTEND_PORT_OR_POSTMAN_ORIGIN || "http://localhost:4000",
    credentials:true
  }))
- app.all("/api/auth/*splat", toNodeHandler(auth));
+ app.use("/api/auth", toNodeHandler(auth));
+//  app.all("/api/auth/*splat", toNodeHandler(auth));
 // app.all("/api/auth/*", toNodeHandler(auth));
+// app.all("/api/auth/:splat(.*)", toNodeHandler(auth));
 // app.all("/api/auth/:path(*)", toNodeHandler(auth));
 
  app.use('/post',postrouter)

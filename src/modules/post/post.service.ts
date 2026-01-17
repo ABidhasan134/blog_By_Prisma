@@ -1,5 +1,4 @@
-
-import { commentStatus, Post, PostStatus } from "../../../generated/prisma/client";
+import { Post, PostStatus } from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 
@@ -147,4 +146,33 @@ const getSingelPostService=async(postId:string)=>{
   console.log("get single service ",result)
   return result
 }
-export const postService = { createPost, allPostGet,getSingelPostService };
+
+const getAllPostSingleUserId=async(id:string)=>{
+  const post = await prisma.post.findFirst({
+  where: {
+    authorId: id,
+    status: PostStatus.ARCHIVED
+  }
+});
+
+if (!post) {
+  // handle empty state
+  return null
+}
+  const result= await prisma.post.findMany({
+    where:{
+     authorId:id 
+    },
+    orderBy:{createdAt:'desc'},
+    include:{
+      _count:{
+        select:{comments:true}
+      }
+    }
+  })
+  const total= await prisma.post.count({
+    where:{authorId:id}
+  })
+  return {result,total}
+}
+export const postService = { createPost, allPostGet,getSingelPostService,getAllPostSingleUserId };

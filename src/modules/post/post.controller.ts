@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { postService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/enums";
 import sortingAndPagination from "../../helpers/sortingHelper";
-import { success } from "better-auth/*";
+
 
 const createPost = async (req: Request, res: Response) => {
   try {
@@ -97,4 +97,27 @@ const getSinglePost=async(req:Request,res:Response)=>{
     })
   }
 }
-export const postsController = { createPost, getallPost,getSinglePost };
+
+const getAllPostBysingelUser = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized"
+      });
+    }
+
+    const result = await postService.getAllPostSingleUserId(user.id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Single user all posts fetched successfully",
+      result
+    });
+  } catch (error) {
+    console.log("error from the single user all post controller", error);
+    return res.status(500).json
+  }}
+export const postsController = { createPost, getallPost,getSinglePost,getAllPostBysingelUser};

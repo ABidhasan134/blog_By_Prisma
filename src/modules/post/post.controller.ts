@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import { postService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/enums";
 import sortingAndPagination from "../../helpers/sortingHelper";
+import { commentService } from "../comment/comment.service";
+import { Post } from "../../../generated/prisma/client";
+import { UserRole } from "../../middlewares/auth";
 
 
 const createPost = async (req: Request, res: Response) => {
@@ -118,6 +121,69 @@ const getAllPostBysingelUser = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.log("error from the single user all post controller", error);
-    return res.status(500).json
+    return res.status(500).json({message:"internal server error",error})
   }}
-export const postsController = { createPost, getallPost,getSinglePost,getAllPostBysingelUser};
+
+const updateUserPostByUserId=async(req:Request,res:Response)=>{
+  try{
+    const {postId}=req.params;
+    const user=req.user;
+    const postInfo=req.body
+    const isAdmin=user?.role===UserRole.admain
+    if(!user?.id){
+      throw new Error("you have to must log in")
+    }
+    const result= await postService.updateByUser(postId as string, user?.id as string,postInfo,isAdmin)
+  return res.status(200).json({
+      success:true,
+      message: "post update successfuly ",
+      result
+    })
+  }
+  catch(error){
+ return res.status(500).json({
+      success:false,
+      message: 'singel internal post'
+    })
+  }
+}
+
+const deletePostByUserId=async(req:Request,res:Response)=>{
+  try{
+    const user=req.user;
+    const {postId}= req.params
+    const isAdmain=user?.role===UserRole.admain
+     if(!user?.id){
+      throw new Error("you have to must log in")
+    }
+    console.log("user info",postId,isAdmain)
+    const result= await postService.deletePostById(postId as string,user?.id as string,isAdmain)
+return res.status(200).json({
+      success:true,
+      message: "post update successfuly ",
+      result
+    })
+  }
+catch (error: any) {
+  if (error.message === 'POST_NOT_FOUND') {
+    return res.status(404).json({
+      success: false,
+      message: 'Post not found',
+    });
+  }
+
+  if (error.message === 'FORBIDDEN') {
+    return res.status(403).json({
+      success: false,
+      message: "You don't have permission to delete this post",
+    });
+  }
+
+  return res.status(500).json({
+    success: false,
+    message: 'Internal server error',
+  });
+}
+
+}
+export const postsController = { createPost, getallPost,getSinglePost,getAllPostBysingelUser,updateUserPostByUserId,deletePostByUserId};

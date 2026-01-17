@@ -175,4 +175,65 @@ if (!post) {
   })
   return {result,total}
 }
-export const postService = { createPost, allPostGet,getSingelPostService,getAllPostSingleUserId };
+
+const updateByUser = async (
+  postId: string,
+  authorId: string,
+  data: Partial<Post>,
+  isAdmin: boolean
+) => {
+  const postInfo = await prisma.post.findUnique({
+    where: { id: postId },
+    select: {
+      id: true,
+      authorId: true,
+    },
+  });
+
+  if (!postInfo) {
+    throw new Error('Post not found');
+  }
+
+  // ownership check
+  if (!isAdmin && postInfo.authorId !== authorId) {
+    throw new Error('This post is not yours');
+  }
+
+  // user cannot update admin-only fields
+  if (!isAdmin) {
+    delete data.isFeatured;
+  }
+
+  return prisma.post.update({
+    where: { id: postId },
+    data,
+  });
+};
+
+const deletePostById = async (
+  postId: string,
+  authorId: string,
+  isAdmin: boolean
+) => {
+  const postInfo = await prisma.post.findUnique({
+    where: { id: postId },
+    select: {
+      id: true,
+      authorId: true,
+    },
+  });
+
+  if (!postInfo) {
+    throw new Error('POST_NOT_FOUND');
+  }
+
+  if (!isAdmin && postInfo.authorId !== authorId) {
+    throw new Error('FORBIDDEN');
+  }
+
+  return prisma.post.delete({
+    where: { id: postId },
+  });
+};
+
+export const postService = { createPost, allPostGet,getSingelPostService,getAllPostSingleUserId,updateByUser,deletePostById};

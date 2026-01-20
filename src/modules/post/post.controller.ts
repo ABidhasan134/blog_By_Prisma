@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { postService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/enums";
 import sortingAndPagination from "../../helpers/sortingHelper";
@@ -7,7 +7,7 @@ import { Post } from "../../../generated/prisma/client";
 import { UserRole } from "../../middlewares/auth";
 
 
-const createPost = async (req: Request, res: Response) => {
+const createPost = async (req: Request, res: Response,next:NextFunction) => {
   try {
     // console.log("coustom user from controller",req.user)
     const result = await postService.createPost(
@@ -17,10 +17,7 @@ const createPost = async (req: Request, res: Response) => {
     console.log("result from the controller", result);
     return res.status(200).json({ message: "post create successfuly" });
   } catch (error: any) {
-    return res.status(500).json({
-      message: "Internal server error",
-      error: error,
-    });
+    next(error)
   }
 };
 const getallPost = async (req: Request, res: Response) => {

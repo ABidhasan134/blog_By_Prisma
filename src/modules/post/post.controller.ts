@@ -186,4 +186,21 @@ catch (error: any) {
 }
 
 }
-export const postsController = { createPost, getallPost,getSinglePost,getAllPostBysingelUser,updateUserPostByUserId,deletePostByUserId};
+
+const postState=async(req:Request,res:Response)=>{
+  try{
+    const result= await postService.stateQueries()
+    return res.status(200).json({
+      success:true,
+      message: "post state get successful",
+      result
+    })
+  }
+  catch(error){
+ return res.status(500).json({
+    success: false,
+    message: 'Internal server error from state',
+  });
+  }
+}
+export const postsController = { createPost, getallPost,getSinglePost,getAllPostBysingelUser,updateUserPostByUserId,deletePostByUserId,postState};

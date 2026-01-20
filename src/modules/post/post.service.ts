@@ -1,6 +1,8 @@
-import { Post, PostStatus } from "../../../generated/prisma/client";
+import { promise } from "better-auth/*";
+import { commentStatus, Post, PostStatus } from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
+import { UserRole } from "../../middlewares/auth";
 
 const createPost = async (
   data: Omit<Post, "id" | "createdAt" | "updatedAt" | "authorId">,
@@ -236,4 +238,46 @@ const deletePostById = async (
   });
 };
 
-export const postService = { createPost, allPostGet,getSingelPostService,getAllPostSingleUserId,updateByUser,deletePostById};
+const stateQueries = async () => {
+  return await prisma.$transaction(async (tx) => {
+    const [
+      totalPost,
+      archivedPost,
+      publishPost,
+      draftPost,
+      totalComment,
+      aprroveComment,
+      totalUser,
+      adminCount,
+      userCount,
+      totalViews
+    ] = await Promise.all([
+      tx.post.count(),
+      tx.post.count({ where: { status: PostStatus.ARCHIVED } }),
+      tx.post.count({ where: { status: PostStatus.PUBLISHED } }),
+      tx.post.count({ where: { status: PostStatus.DRAFT } }),
+      tx.comment.count(),
+      tx.comment.count({where:{status:commentStatus.APPROVED}}),
+      tx.user.count(),
+      tx.user.count({where:{role:UserRole.admain}}),
+      tx.user.count({where:{role:UserRole.user}}),
+      tx.post.aggregate({_sum:{viewCount:true}})
+    ]);
+
+    return {
+      totalPost,
+      archivedPost,
+      publishPost,
+      draftPost,
+      totalComment,
+      aprroveComment,
+       totalUser,
+      adminCount,
+      userCount,
+      totalViews:totalViews._sum.viewCount
+    };
+  });
+};
+
+
+export const postService = { createPost, allPostGet,getSingelPostService,getAllPostSingleUserId,updateByUser,deletePostById,stateQueries};

@@ -5,6 +5,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from './auth';
 import cors from 'cors'
 import errorHandler from '../middlewares/globalErrorHeandelr';
+import routeNotFound from '../middlewares/routeNotFound';
  const app=express();
 
  app.use(express.json());
@@ -20,5 +21,6 @@ import errorHandler from '../middlewares/globalErrorHeandelr';
     console.log("Hello world")
     res.send("hello world")
  })
+ app.use(routeNotFound)
  app.use(errorHandler)
  export default app;

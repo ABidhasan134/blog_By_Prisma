@@ -121,7 +121,7 @@ const getAllPostBysingelUser = async (req: Request, res: Response) => {
     return res.status(500).json({message:"internal server error",error})
   }}
 
-const updateUserPostByUserId=async(req:Request,res:Response)=>{
+const updateUserPostByUserId=async(req:Request,res:Response,next:NextFunction)=>{
   try{
     const {postId}=req.params;
     const user=req.user;
@@ -137,11 +137,8 @@ const updateUserPostByUserId=async(req:Request,res:Response)=>{
       result
     })
   }
-  catch(error){
- return res.status(500).json({
-      success:false,
-      message: 'singel internal post'
-    })
+  catch(error:any){
+ next(error);
   }
 }
 
